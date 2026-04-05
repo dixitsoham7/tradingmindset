@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Morning Ritual — Soham</title>
+<style>
+:root{
+  --bg:#0c0c0a;--card:#161612;--border:#272720;--text:#f0efe8;--muted:#5a5a50;
+  --faint:#1c1c16;--g:#4ade80;--a:#fbbf24;--r:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+.wrap{max-width:600px;margin:0 auto;}
+.popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;display:none;align-items:center;justify-content:center;padding:20px;}
+.popup-overlay.show{display:flex;}
+.popup-box{background:#0f0f0d;border:.5px solid rgba(74,222,128,.35);border-radius:20px;padding:32px 24px;max-width:440px;width:100%;text-align:center;animation:popIn .3s ease;}
+@keyframes popIn{from{transform:scale(.92);opacity:0;}to{transform:scale(1);opacity:1;}}
+.popup-icon{font-size:44px;margin-bottom:14px;line-height:1;}
+.popup-title{font-size:22px;font-weight:800;color:var(--g);letter-spacing:-.02em;margin-bottom:20px;line-height:1.25;}
+.popup-lines{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
+.popup-line{font-size:14px;color:rgba(240,239,232,.82);line-height:1.6;padding:11px 14px;background:rgba(74,222,128,.06);border-radius:10px;border:.5px solid rgba(74,222,128,.14);}
+.popup-line strong{color:var(--g);font-weight:600;}
+.popup-close{width:100%;min-height:52px;border-radius:12px;border:none;background:var(--g);color:#000;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.01em;touch-action:manipulation;}
+
+/* MASTER TIMER BAR */
+.timer-bar-wrap{position:sticky;top:0;z-index:99;background:var(--bg);padding:12px 20px 10px;border-bottom:.5px solid var(--border);}
+.timer-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.timer-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.timer-count{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--a);}
+.timer-bg{background:var(--border);border-radius:4px;height:4px;overflow:hidden;}
+.timer-fill{height:100%;border-radius:4px;background:var(--a);transition:width .5s linear,background .5s;}
+.timer-fill.done{background:var(--g);}
+
+/* TOP */
+.top{padding:28px 20px 0;}
+.soham-line{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:10px;}
+.hero{font-size:32px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1.1;margin-bottom:14px;}
+.hero span{color:var(--g);}
+.warning-box{background:#1a1400;border:.5px solid rgba(251,191,36,.3);border-radius:12px;padding:14px 16px;}
+.warning-box p{font-size:13px;color:rgba(251,191,36,.9);line-height:1.7;}
+.warning-box strong{color:var(--a);font-weight:700;}
+
+/* DIVIDER */
+.div{border:none;border-top:.5px solid var(--border);margin:24px 20px;}
+
+/* SECTION */
+.sec{padding:0 20px;margin-bottom:24px;}
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:14px;}
+
+/* IDENTITY */
+.id-list{display:flex;flex-direction:column;gap:1px;border-radius:14px;overflow:hidden;border:.5px solid var(--border);}
+.id-item{background:var(--card);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;}
+.id-num{font-size:10px;font-weight:700;color:var(--muted);margin-top:2px;min-width:16px;}
+.id-text{font-size:14px;line-height:1.6;color:var(--text);}
+.id-text em{font-style:normal;color:var(--g);font-weight:600;}
+
+/* PROCESS TRUTHS */
+.truth-list{display:flex;flex-direction:column;gap:8px;}
+.truth{border-radius:12px;padding:14px 16px;}
+.truth.green{background:rgba(74,222,128,.07);border:.5px solid rgba(74,222,128,.2);}
+.truth.amber{background:rgba(251,191,36,.06);border:.5px solid rgba(251,191,36,.18);}
+.truth.red{background:rgba(248,113,113,.07);border:.5px solid rgba(248,113,113,.2);}
+.truth-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.truth.green .truth-tag{color:var(--g);}
+.truth.amber .truth-tag{color:var(--a);}
+.truth.red .truth-tag{color:var(--r);}
+.truth-body{font-size:13px;line-height:1.7;color:rgba(240,239,232,.88);}
+.truth-body strong{font-weight:600;color:var(--text);}
+
+/* CHECKLIST */
+.check-list{display:flex;flex-direction:column;gap:8px;}
+.chk{border-radius:12px;border:.5px solid var(--border);background:var(--card);overflow:hidden;transition:border-color .3s,background .3s;}
+.chk.unlocked{cursor:pointer;}
+.chk.ticked{background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.3);}
+.chk-inner{padding:13px 16px;display:flex;align-items:flex-start;gap:12px;}
+.chk-left{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px;}
+.chk-box{width:24px;height:24px;border-radius:7px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .25s;background:var(--faint);}
+.chk.unlocked:not(.ticked) .chk-box{border-color:rgba(240,239,232,.3);}
+.chk.ticked .chk-box{background:var(--g);border-color:var(--g);}
+.chk-tick{font-size:13px;color:#000;opacity:0;transition:opacity .2s;}
+.chk.ticked .chk-tick{opacity:1;}
+.chk-countdown{font-size:10px;font-weight:700;color:var(--a);min-height:14px;text-align:center;}
+.chk-content{flex:1;}
+.chk-title{font-size:14px;font-weight:600;line-height:1.4;transition:color .3s;}
+.chk.ticked .chk-title{color:var(--g);}
+.chk-sub{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5;}
+.chk.ticked .chk-sub{color:rgba(74,222,128,.5);}
+.chk-locked-msg{font-size:10px;color:var(--muted);padding:0 16px 10px 52px;font-style:italic;}
+
+/* ACKNOWLEDGE */
+.ack-wrap{padding:0 20px;margin-bottom:24px;}
+.ack-btn{width:100%;min-height:56px;border-radius:14px;border:none;font-size:16px;font-weight:800;letter-spacing:.02em;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ack-btn.locked{background:var(--card);color:var(--muted);border:.5px solid var(--border);pointer-events:none;}
+.ack-btn.ready{background:var(--g);color:#000;}
+.ack-btn.done{background:rgba(74,222,128,.15);color:var(--g);border:.5px solid rgba(74,222,128,.3);pointer-events:none;}
+.ack-note{font-size:11px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;}
+
+/* DONE STATE */
+.done-state{display:none;padding:20px;text-align:center;}
+.done-state.show{display:block;}
+.done-big{font-size:22px;font-weight:800;color:var(--g);margin-bottom:8px;}
+.done-sub{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* RESET */
+.reset-wrap{padding:0 20px;text-align:center;}
+.reset-btn{background:none;border:.5px solid var(--border);color:var(--muted);font-size:11px;padding:8px 20px;border-radius:20px;cursor:pointer;touch-action:manipulation;}
+</style>
+</head>
+<body>
+
+<!-- MASTER TIMER -->
+<div class="wrap">
+<div class="timer-bar-wrap">
+  <div class="timer-top">
+    <div class="timer-label">Read time — do not rush</div>
+    <div class="timer-count" id="timerCount">90s</div>
+  </div>
+  <div class="timer-bg"><div class="timer-fill" id="timerFill" style="width:0%"></div></div>
+</div>
+
+<!-- TOP -->
+<div class="top" style="margin-bottom:24px;">
+  <div class="soham-line">This is for you</div>
+  <div class="hero">SOHAM —<br>You are <span>the process.</span></div>
+  <div class="warning-box">
+    <p>Every time you go away from these principles, <strong>you delay the life you are building.</strong> Not tomorrow. Right now, in this trade. Read this fully. Every word. Then trade.</p>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- WHO I AM -->
+<div class="sec">
+  <div class="sec-label">I am — say this, mean this</div>
+  <div class="id-list">
+    <div class="id-item"><div class="id-num">01</div><div class="id-text">I follow <em>price action and setups</em> — not my mind, not my impulse, not what I want the market to do.</div></div>
+    <div class="id-item"><div class="id-num">02</div><div class="id-text">I trade only <em>high probability setups.</em> If the setup is not there, I am not there.</div></div>
+    <div class="id-item"><div class="id-num">03</div><div class="id-text">I analyse charts <em>as if I have no position in them.</em> I am neutral. I am objective. Always.</div></div>
+    <div class="id-item"><div class="id-num">04</div><div class="id-text">I take only trades where the <em>reward clearly outweighs the risk.</em> R:R is calculated before entry. Not after.</div></div>
+    <div class="id-item"><div class="id-num">05</div><div class="id-text">I <em>find other things to do</em> once my trade goes live. I do not stare at the screen. I do not interfere.</div></div>
+    <div class="id-item"><div class="id-num">06</div><div class="id-text">I am <em>not emotionally affected</em> by profits or losses. Each trade is just one data point in a long series.</div></div>
+    <div class="id-item"><div class="id-num">07</div><div class="id-text">I count my profit <em>only after exiting.</em> A position is not money. An exit is money.</div></div>
+    <div class="id-item"><div class="id-num">08</div><div class="id-text">I am <em>happy and satisfied with every point captured</em> according to the plan. 30 points done right is success.</div></div>
+    <div class="id-item"><div class="id-num">09</div><div class="id-text">I <em>respect and protect my capital</em> above all else. Capital is the business. Without it, there is no game.</div></div>
+    <div class="id-item"><div class="id-num">10</div><div class="id-text">I am <em>the most disciplined trader</em> I know. Today I prove it — one trade at a time.</div></div>
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- PROCESS TRUTHS -->
+<div class="sec">
+  <div class="sec-label">What the process demands</div>
+  <div class="truth-list">
+
+    <div class="truth green">
+      <div class="truth-tag">On setups</div>
+      <div class="truth-body">Setups improve the probability of winning. <strong>They do not guarantee it.</strong> No setup works every time. My job is to execute the process correctly — the outcome is the market's business, not mine.</div>
+    </div>
+
+    <div class="truth green">
+      <div class="truth-tag">On size — the only rule</div>
+      <div class="truth-body"><strong>130 in the box. First. Always.</strong> I say it before I open the order window. I do not look at the premium and calculate what 5000 qty would make. That calculation is the enemy. It has cost me more than any bad setup ever has.</div>
+    </div>
+
+    <div class="truth amber">
+      <div class="truth-tag">On small profits</div>
+      <div class="truth-body">30 points is not a small profit. It is the plan working. <strong>The feeling that it is not enough is the lie</strong> that has kept me in the loop for 2 years. I am happy and satisfied with every profit that comes from following the process.</div>
+    </div>
+
+    <div class="truth amber">
+      <div class="truth-tag">On losing trades</div>
+      <div class="truth-body">A failed setup is not a failure of character. <strong>The response to a failed setup — that is character.</strong> I accept the small loss. I do not average down. I do not revenge trade. I wait for the next setup.</div>
+    </div>
+
+    <div class="truth red">
+      <div class="truth-tag">The loop I am breaking — today</div>
+      <div class="truth-body">For 2 years the scalper voice has won in the moment. <strong>5000 qty × 10 pts = ₹50,000.</strong> That thought has cost me more than any market move. Today the voice fires and I say: <em style="color:var(--g);font-style:normal;">130 in the box. Points on the board. Week target in view.</em> Then I execute or walk away.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="div"></div>
+
+<!-- TIMED CHECKLIST -->
+<div class="sec">
+  <div class="sec-label">Before the trading terminal — 5 commitments</div>
+  <div class="check-list" id="checkList">
+
+    <div class="chk" id="c0" data-unlock="12">
+      <div class="chk-inner">
+        <div class="chk-left">
+          <div class="chk-box"><span class="chk-tick">✓</span></div>
+          <div class="chk-countdown" id="cd0"></div>
+        </div>
+        <div class="chk-content">
+          <div class="chk-title">I have a setup — not a feeling</div>
+          <div class="chk-sub">The setup exists on the chart before I open the order window. If I cannot describe it in one sentence, it is not a setup.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chk" id="c1" data-unlock="24">
+      <div class="chk-inner">
+        <div class="chk-left">
+          <div class="chk-box"><span class="chk-tick">✓</span></div>
+          <div class="chk-countdown" id="cd1"></div>
+        </div>
+        <div class="chk-content">
+          <div class="chk-title">SL is defined in points — before entry</div>
+          <div class="chk-sub">Not "I'll see where it goes." Not a mental stop. A real number. Written or said out loud before the order is placed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chk" id="c2" data-unlock="38">
+      <div class="chk-inner">
+        <div class="chk-left">
+          <div class="chk-box"><span class="chk-tick">✓</span></div>
+          <div class="chk-countdown" id="cd2"></div>
+        </div>
+        <div class="chk-content">
+          <div class="chk-title">Lot size is from the calculator — not gut</div>
+          <div class="chk-sub">I open the calculator. I enter the SL. I use the recommended lots. 130 goes in the order box first. Any change upward requires a reason, not a feeling.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chk" id="c3" data-unlock="52">
+      <div class="chk-inner">
+        <div class="chk-left">
+          <div class="chk-box"><span class="chk-tick">✓</span></div>
+          <div class="chk-countdown" id="cd3"></div>
+        </div>
+        <div class="chk-content">
+          <div class="chk-title">Intraday or overnight — decided now, not later</div>
+          <div class="chk-sub">If overnight: the hedge is planned before entry. Not "I'll hedge if it goes against me." That plan never survives contact with a moving position.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chk" id="c4" data-unlock="68">
+      <div class="chk-inner">
+        <div class="chk-left">
+          <div class="chk-box"><span class="chk-tick">✓</span></div>
+          <div class="chk-countdown" id="cd4"></div>
+        </div>
+        <div class="chk-content">
+          <div class="chk-title">Daily stop is ₹5,000 — I will honour it today</div>
+          <div class="chk-sub">If ₹5,000 is gone, the terminal closes. No "one more trade to recover." No exceptions. The market will be there tomorrow. My capital must be too.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ACKNOWLEDGE BUTTON -->
+<div class="ack-wrap">
+  <button class="ack-btn locked" id="ackBtn" onclick="acknowledge()">
+    <span id="ackBtnText">Complete all 5 commitments to proceed</span>
+  </button>
+  <div class="ack-note" id="ackNote">Each commitment unlocks as you read. This cannot be rushed.</div>
+</div>
+
+<!-- DONE STATE -->
+<div class="done-state" id="doneState">
+  <div class="done-big">You are ready.</div>
+  <div class="done-sub">Process locked. Identity confirmed.<br>Now wait for the setup to come to you.<br><br><em style="color:var(--muted);">"The only holy grail in trading is the discipline to follow the process."</em></div>
+</div>
+
+<div class="div"></div>
+
+<div class="reset-wrap" style="margin-bottom:16px;">
+  <button class="reset-btn" onclick="resetAll()">Reset for tomorrow</button>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- AFFIRMATION POPUP -->
+<div class="popup-overlay" id="popup">
+  <div class="popup-box">
+    <div class="popup-icon">🎯</div>
+    <div class="popup-title">You are ready.<br>Now go be patient.</div>
+    <div class="popup-lines">
+      <div class="popup-line"><strong>Let the trade come to you.</strong> You do not chase. You select.</div>
+      <div class="popup-line"><strong>Trade what you see — not what you feel.</strong> The chart tells the truth. Your emotions lie.</div>
+      <div class="popup-line"><strong>This is not the last trading day.</strong> The market opens tomorrow too. Protect today.</div>
+      <div class="popup-line"><strong>Be focused. Don't rush.</strong> One clean trade beats five sloppy ones every time.</div>
+      <div class="popup-line"><strong>30 points is the job done.</strong> Capture it. Close the shop. Walk away proud.</div>
+    </div>
+    <button class="popup-close" onclick="closePopup()">I'm ready — open the terminal</button>
+  </div>
+</div>
+
+<script>
+const TOTAL_TIME = 90;
+let elapsed = 0;
+let timerDone = false;
+let allChecked = false;
+let acknowledged = false;
+let checks = [false, false, false, false, false];
+const UNLOCK_TIMES = [12, 24, 38, 52, 68];
+
+// Load state
+const todayKey = 'ritual2_' + new Date().toISOString().slice(0, 10);
+try {
+  const saved = JSON.parse(localStorage.getItem(todayKey) || '{}');
+  if (saved.acknowledged) {
+    acknowledged = true;
+    checks = [true, true, true, true, true];
+    elapsed = TOTAL_TIME;
+    timerDone = true;
+  } else {
+    checks = saved.checks || [false, false, false, false, false];
+    elapsed = Math.min(saved.elapsed || 0, TOTAL_TIME);
+    if (elapsed >= TOTAL_TIME) timerDone = true;
+  }
+} catch(e) {}
+
+// Timer
+const timerInterval = setInterval(() => {
+  if (acknowledged) { clearInterval(timerInterval); return; }
+  elapsed = Math.min(elapsed + 1, TOTAL_TIME);
+  const pct = (elapsed / TOTAL_TIME) * 100;
+  document.getElementById('timerFill').style.width = pct + '%';
+  const remaining = TOTAL_TIME - elapsed;
+  document.getElementById('timerCount').textContent = remaining > 0 ? remaining + 's' : 'Done ✓';
+  if (elapsed >= TOTAL_TIME) {
+    timerDone = true;
+    document.getElementById('timerFill').classList.add('done');
+    document.getElementById('timerCount').style.color = 'var(--g)';
+    clearInterval(timerInterval);
+  }
+  updateUnlocks();
+  updateAckButton();
+  saveState();
+}, 1000);
+
+// Unlock checkboxes based on elapsed time
+function updateUnlocks() {
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById('c' + i);
+    const cd = document.getElementById('cd' + i);
+    const unlockAt = UNLOCK_TIMES[i];
+    if (elapsed >= unlockAt || acknowledged) {
+      el.classList.add('unlocked');
+      el.onclick = () => toggleCheck(i);
+      cd.textContent = '';
+      if (checks[i]) el.classList.add('ticked');
+    } else {
+      const wait = unlockAt - elapsed;
+      cd.textContent = wait + 's';
+    }
+  }
+}
+
+function toggleCheck(i) {
+  const el = document.getElementById('c' + i);
+  if (!el.classList.contains('unlocked')) return;
+  if (acknowledged) return;
+  checks[i] = !checks[i];
+  el.classList.toggle('ticked', checks[i]);
+  allChecked = checks.every(c => c);
+  updateAckButton();
+  saveState();
+}
+
+function updateAckButton() {
+  const btn = document.getElementById('ackBtn');
+  const note = document.getElementById('ackNote');
+  if (acknowledged) return;
+  const checkedCount = checks.filter(c => c).length;
+  if (allChecked && timerDone) {
+    btn.className = 'ack-btn ready';
+    document.getElementById('ackBtnText').textContent = 'I acknowledge — I am ready to trade';
+    note.textContent = 'Tap to confirm. This is your commitment for today.';
+  } else if (!timerDone && !allChecked) {
+    btn.className = 'ack-btn locked';
+    document.getElementById('ackBtnText').textContent = 'Read fully — commitments unlock as you go';
+    note.textContent = 'Each commitment unlocks as you read. This cannot be rushed.';
+  } else if (!timerDone) {
+    const remaining = TOTAL_TIME - elapsed;
+    btn.className = 'ack-btn locked';
+    document.getElementById('ackBtnText').textContent = checkedCount + ' of 5 done · ' + remaining + 's remaining';
+    note.textContent = 'Finish reading before you can acknowledge.';
+  } else {
+    btn.className = 'ack-btn locked';
+    document.getElementById('ackBtnText').textContent = checkedCount + ' of 5 commitments confirmed';
+    note.textContent = 'Tick all 5 to proceed.';
+  }
+}
+
+function acknowledge() {
+  if (!allChecked || !timerDone || acknowledged) return;
+  acknowledged = true;
+  const btn = document.getElementById('ackBtn');
+  btn.className = 'ack-btn done';
+  document.getElementById('ackBtnText').textContent = 'Acknowledged ✓';
+  document.getElementById('ackNote').style.display = 'none';
+  document.getElementById('doneState').classList.add('show');
+  clearInterval(timerInterval);
+  document.getElementById('timerFill').style.width = '100%';
+  document.getElementById('timerFill').classList.add('done');
+  document.getElementById('timerCount').textContent = 'Done ✓';
+  document.getElementById('timerCount').style.color = 'var(--g)';
+  saveState();
+  // Show affirmation popup
+  document.getElementById('popup').classList.add('show');
+}
+
+function closePopup() {
+  document.getElementById('popup').classList.remove('show');
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(todayKey, JSON.stringify({ checks, elapsed, acknowledged }));
+  } catch(e) {}
+}
+
+function resetAll() {
+  if (!confirm('Reset for a fresh read tomorrow?')) return;
+  checks = [false, false, false, false, false];
+  elapsed = 0; timerDone = false; allChecked = false; acknowledged = false;
+  try { localStorage.removeItem(todayKey); } catch(e) {}
+  location.reload();
+}
+
+// Restore state on load
+function restoreState() {
+  document.getElementById('timerFill').style.width = (elapsed / TOTAL_TIME * 100) + '%';
+  if (elapsed >= TOTAL_TIME) {
+    document.getElementById('timerFill').classList.add('done');
+    document.getElementById('timerCount').textContent = 'Done ✓';
+    document.getElementById('timerCount').style.color = 'var(--g)';
+  } else {
+    document.getElementById('timerCount').textContent = (TOTAL_TIME - elapsed) + 's';
+  }
+  updateUnlocks();
+  allChecked = checks.every(c => c);
+  if (acknowledged) {
+    document.getElementById('ackBtn').className = 'ack-btn done';
+    document.getElementById('ackBtnText').textContent = 'Acknowledged ✓';
+    document.getElementById('ackNote').style.display = 'none';
+    document.getElementById('doneState').classList.add('show');
+    for (let i = 0; i < 5; i++) {
+      document.getElementById('c' + i).classList.add('unlocked', 'ticked');
+      document.getElementById('cd' + i).textContent = '';
+    }
+  } else {
+    updateAckButton();
+  }
+}
+restoreState();
+</script>
+</body>
+</html>
